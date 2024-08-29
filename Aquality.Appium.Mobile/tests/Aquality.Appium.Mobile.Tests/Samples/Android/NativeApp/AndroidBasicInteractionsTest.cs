@@ -34,6 +34,13 @@ namespace Aquality.Appium.Mobile.Tests.Samples.Android.NativeApp
             Assert.DoesNotThrow(app.Install);
             Assert.That(app.GetState(id), Is.EqualTo(AppState.NotRunning));
         }
+        [Test]
+        public void SearchViewFilterScreen()
+        {
+            var searchViewButton = new SearchViewFilterScreen();
+            searchViewButton.Open();
+            searchViewButton.pressFilterAndTypeText();
+        }
 
         [Test]
         public void SendKeys()
