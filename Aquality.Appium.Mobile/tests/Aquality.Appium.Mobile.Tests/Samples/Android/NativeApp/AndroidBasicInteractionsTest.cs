@@ -4,6 +4,8 @@ using Aquality.Appium.Mobile.Tests.Samples.Android.NativeApp.ApiDemos.Screens;
 using NUnit.Framework;
 using OpenQA.Selenium.Appium.Enums;
 using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace Aquality.Appium.Mobile.Tests.Samples.Android.NativeApp
 {
@@ -34,12 +36,50 @@ namespace Aquality.Appium.Mobile.Tests.Samples.Android.NativeApp
             Assert.DoesNotThrow(app.Install);
             Assert.That(app.GetState(id), Is.EqualTo(AppState.NotRunning));
         }
+       // Anns test 
         [Test]
         public void SearchViewFilterScreen()
         {
             var searchViewButton = new SearchViewFilterScreen();
             searchViewButton.Open();
             searchViewButton.pressFilterAndTypeText();
+        }
+
+        [Test]
+       
+        [TestCase("ana_4FQEHt", "NjuUqZQjgNi3HHrYjL3G", @"C:\Users\a.mandzulashvili\Desktop\re new\aquality-appium-mobile-dotnet\Aquality.Appium.Mobile\tests\Aquality.Appium.Mobile.Tests\Resources\Apps\ApiDemos-debug.apk")]
+        public void UploadAppToBrowserStack(string username, string accessKey, string filePath)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                // Set the basic authentication header
+                var byteArray = new System.Text.ASCIIEncoding().GetBytes($"{username}:{accessKey}");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+
+                // Prepare the multipart form data
+                var form = new MultipartFormDataContent();
+
+                // Add the APK file to the form
+                var fileContent = new ByteArrayContent(System.IO.File.ReadAllBytes(filePath));
+                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/octet-stream");
+                form.Add(fileContent, "file", "application-debug.apk");
+
+                // Add custom ID and iOS keychain support parameters
+                form.Add(new StringContent("SampleApp"), "custom_id");
+                form.Add(new StringContent("true"), "ios_keychain_support");
+
+                // Make the POST request to BrowserStack
+                HttpResponseMessage response = client.PostAsync("https://api-cloud.browserstack.com/app-automate/upload", form).Result;
+
+             
+
+                // Get the response content synchronously
+                string result = response.Content.ReadAsStringAsync().Result;
+
+                // Output the response content for verification
+                TestContext.WriteLine("App uploaded successfully:");
+                TestContext.WriteLine(result);
+            }
         }
 
         [Test]
